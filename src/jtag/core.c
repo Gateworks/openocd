@@ -1652,6 +1652,11 @@ int jtag_init(struct command_context *cmd_ctx)
 	if (retval != ERROR_OK)
 		return retval;
 
+	// Ensure reset before first scan chain interrogation
+	jtag_add_reset(1, 0);
+	jtag_add_sleep(2);    // 2us sleep. CC1352 requires >1us
+	jtag_add_reset(0, 0);
+
 	if (Jim_Eval_Named(cmd_ctx->interp, "jtag_init", __FILE__, __LINE__) != JIM_OK)
 		return ERROR_FAIL;
 
