@@ -1126,10 +1126,13 @@ static int jtag_examine_chain(void)
 	 * Then make sure the scan data has both ones and zeroes.
 	 */
 	LOG_DEBUG("DR scan interrogation for IDCODE/BYPASS");
-	retval = jtag_examine_chain_execute(idcode_buffer, max_taps);
-	if (retval != ERROR_OK)
-		goto out;
-	if (!jtag_examine_chain_check(idcode_buffer, max_taps)) {
+	int retry;
+	for (retry = 100; retry > 0; retry--) {
+		retval = jtag_examine_chain_execute(idcode_buffer, max_taps);
+		if (jtag_examine_chain_check(idcode_buffer, max_taps))
+			break;
+	}
+	if (!retry) {
 		retval = ERROR_JTAG_INIT_FAILED;
 		goto out;
 	}
