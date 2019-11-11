@@ -1519,7 +1519,12 @@ int jtag_init_inner(struct command_context *cmd_ctx)
 	 * latter is uncommon, but easily worked around:  provide
 	 * ircapture/irmask values during TAP setup.)
 	 */
-	retval = jtag_validate_ircapture();
+	int retry;
+	for (retry = 100; retry > 0; retry--) {
+		retval = jtag_validate_ircapture();
+		if (retval == ERROR_OK)
+			break;
+	}
 	if (retval != ERROR_OK) {
 		/* The target might be powered down. The user
 		 * can power it up and reset it after firing
